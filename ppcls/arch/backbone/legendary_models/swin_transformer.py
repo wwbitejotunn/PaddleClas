@@ -584,19 +584,19 @@ class PatchEmbed(nn.Layer):
         self.embed_dim = embed_dim
 
         self.proj = nn.Conv2D(
-            in_chans, embed_dim, kernel_size=patch_size, stride=patch_size)
+            in_chans, embed_dim, kernel_size=patch_size, stride=patch_size, data_format='NHWC')
         if norm_layer is not None:
             self.norm = norm_layer(embed_dim)
         else:
             self.norm = None
 
     def forward(self, x):
-        B, C, H, W = x.shape
+        # B, H, W, C = x.shape
         # TODO (littletomatodonkey), uncomment the line will cause failure of jit.save
         # assert [H, W] == self.img_size[:2], "Input image size ({H}*{W}) doesn't match model ({}*{}).".format(H, W, self.img_size[0], self.img_size[1])
         x = self.proj(x)
-
-        x = x.flatten(2).transpose([0, 2, 1])  # B Ph*Pw C
+        B, Ph, Pw, C = x.shape
+        x = x.reshape((-1,Ph*Pw,C))  # B Ph*Pw C
         if self.norm is not None:
             x = self.norm(x)
         return x
@@ -782,11 +782,11 @@ def SwinTransformer_tiny_patch4_window7_224(pretrained=False,
         window_size=7,
         drop_path_rate=0.2,
         **kwargs)
-    _load_pretrained(
-        pretrained,
-        model,
-        MODEL_URLS["SwinTransformer_tiny_patch4_window7_224"],
-        use_ssld=use_ssld)
+    # _load_pretrained(
+    #     pretrained,
+    #     model,
+    #     MODEL_URLS["SwinTransformer_tiny_patch4_window7_224"],
+    #     use_ssld=use_ssld)
     return model
 
 

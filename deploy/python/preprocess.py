@@ -362,3 +362,17 @@ class ToCHWImage(object):
             img = np.array(img)
 
         return img.transpose((2, 0, 1))
+
+class ToHWCImage(object):
+    """ convert chw image to hwc image
+    """
+
+    def __init__(self):
+        pass
+
+    def __call__(self, img):
+        from PIL import Image
+        if isinstance(img, Image.Image):
+            img = np.array(img)
+
+        return img.transpose((1, 2, 0))
